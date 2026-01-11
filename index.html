@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>수정용 촬영 지도 표시</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+body { margin: 0; font-family: "Segoe UI", sans-serif; }
+
+#bar {
+  background: #222;
+  color: white;
+  padding: 8px;
+}
+
+button {
+  margin-right: 6px;
+  padding: 6px 10px;
+}
+
+#map {
+  width: 100vw;
+  height: calc(100vh - 50px);
+}
+
+/* ======================
+   촬영용 오버레이 UI
+   ====================== */
+#overlay {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  min-width: 220px;
+}
+
+#overlay h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+#overlay .subtitle {
+  font-size: 12px;
+  color: #555;
+  margin-top: 4px;
+}
+
+#overlay .info {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #222;
+}
+
+/* ===== 텍스트 스타일 ===== */
+.label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+  text-shadow:
+    -1px -1px 0 #fff,
+     1px -1px 0 #fff,
+    -1px  1px 0 #fff,
+     1px  1px 0 #fff;
+}
+
+.label-yellow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: bold;
+  color: yellow;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}
+
+/* ===== 아이콘 원 ===== */
+.icon-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-circle img {
+  width: 14px;
+  height: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="bar">
+  <button onclick="setTool('text')">텍스트</button>
+  <button onclick="setTool('delete')">삭제</button>
+  <button onclick="exportData()">저장</button>
+</div>
+
+<div id="map"></div>
+
+<!-- 📸 촬영용 지도 오버레이 -->
+<div id="overlay">
+  <h1>촬영용 지도</h1>
+  <div class="subtitle">Map for photographers</div>
+  <div class="info">
+    • 주요 촬영 지점 표시<br>
+    • 촬영 지점 표시 요청 가능
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+/* =========================
+   지도 생성
+   ========================= */
+const map = L.map("map").setView([37.5665, 126.9780], 11);
+
+L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  { maxZoom: 19 }
+).addTo(map);
+
+/* === 지도 데이터 === */
+
+
+L.marker([37.449312979432385, 126.45111322402956], {
+  icon: L.divIcon({
+    className: "",
+    html: `
+      <div class="label">
+        <div class="icon-circle">
+          
+        </div>
+        <span>🛫인천국제공항 제1여객터미널</span>
+      </div>
+    `,
+    iconSize: [0, 0]
+  })
+}).addTo(map);
+
+
+L.marker([37.46730010634301, 126.43469810485841], {
+  icon: L.divIcon({
+    className: "",
+    html: `
+      <div class="label">
+        <div class="icon-circle">
+          
+        </div>
+        <span>🛫인천국제공항 제2여객터미널</span>
+      </div>
+    `,
+    iconSize: [0, 0]
+  })
+}).addTo(map);
+
+
+L.marker([37.55908933029367, 126.80326581001283], {
+  icon: L.divIcon({
+    className: "",
+    html: `
+      <div class="label">
+        <div class="icon-circle">
+          
+        </div>
+        <span>🛫김포국제공항 국내선 여객터미널</span>
+      </div>
+    `,
+    iconSize: [0, 0]
+  })
+}).addTo(map);
+
+
+L.marker([37.56588157675886, 126.80068016052248], {
+  icon: L.divIcon({
+    className: "",
+    html: `
+      <div class="label">
+        <div class="icon-circle">
+          
+        </div>
+        <span>🛫김포국제공항 국제선 여객터미널</span>
+      </div>
+    `,
+    iconSize: [0, 0]
+  })
+}).addTo(map);
+
+
+L.marker([37.439393186544955, 126.43142580986024], {
+  icon: L.divIcon({
+    className: "",
+    html: `
+      <div class="label-yellow">
+        <div class="icon-circle">
+          
+        </div>
+        <span>☕️스타파이브 카페</span>
+      </div>
+    `,
+    iconSize: [0, 0]
+  })
+}).addTo(map);
+
+
+L.marker([35.17261581815727, 128.9466190338135], {
+  icon: L.divIcon({
+    className: "",
+    html: `
+      <div class="label">
+        <div class="icon-circle">
+          
+        </div>
+        <span>🛫김해국제공항 국제선 여객터미널</span>
+      </div>
+    `,
+    iconSize: [0, 0]
+  })
+}).addTo(map);
+
+
+L.marker([35.17021139702981, 128.94891500473025], {
+  icon: L.divIcon({
+    className: "",
+    html: `
+      <div class="label">
+        <div class="icon-circle">
+          
+        </div>
+        <span>🛫김해국제공항 국내선 여객터미널</span>
+      </div>
+    `,
+    iconSize: [0, 0]
+  })
+}).addTo(map);
+
+
+L.marker([34.8402315708376, 127.61390447616579], {
+  icon: L.divIcon({
+    className: "",
+    html: `
+      <div class="label">
+        <div class="icon-circle">
+          
+        </div>
+        <span>🛫여수공항</span>
+      </div>
+    `,
+    iconSize: [0, 0]
+  })
+}).addTo(map);
+
+
+L.marker([35.899080985937736, 128.63916814327243], {
+  icon: L.divIcon({
+    className: "",
+    html: `
+      <div class="label">
+        <div class="icon-circle">
+          
+        </div>
+        <span>🛫대국국제공항 국내선 여객터미널</span>
+      </div>
+    `,
+    iconSize: [0, 0]
+  })
+}).addTo(map);
+
+
+L.marker([35.14000382307701, 126.81081891059877], {
+  icon: L.divIcon({
+    className: "",
+    html: `
+      <div class="label">
+        <div class="icon-circle">
+          
+        </div>
+        <span>🛫광주공항</span>
+      </div>
+    `,
+    iconSize: [0, 0]
+  })
+}).addTo(map);
+
+
+L.marker([36.72205776845206, 127.4958872795105], {
+  icon: L.divIcon({
+    className: "",
+    html: `
+      <div class="label">
+        <div class="icon-circle">
+          
+        </div>
+        <span>🛫청주국제공항</span>
+      </div>
+    `,
+    iconSize: [0, 0]
+  })
+}).addTo(map);
+
+
+/* =========================
+   상태
+   ========================= */
+let currentTool = "text";
+const savedObjects = [];
+
+/* =========================
+   도구 전환
+   ========================= */
+function setTool(tool) {
+  currentTool = tool;
+}
+
+/* =========================
+   지도 클릭 (텍스트)
+   ========================= */
+map.on("click", function(e) {
+
+  if (currentTool === "text") {
+    const text = prompt("텍스트 입력");
+    if (!text) return;
+
+    const iconUrl = prompt("아이콘 이미지 주소 (없으면 비워두기)", "");
+
+    const style = prompt(
+      "텍스트 스타일 선택:\n1 = 기본(검정)\n2 = 노랑",
+      "1"
+    );
+
+    const labelClass = style === "2" ? "label-yellow" : "label";
+
+    const marker = L.marker(e.latlng, {
+      icon: L.divIcon({
+        className: "",
+        html: `
+          <div class="${labelClass}">
+            <div class="icon-circle">
+              ${iconUrl ? `<img src="${iconUrl}">` : ""}
+            </div>
+            <span>${text}</span>
+          </div>
+        `,
+        iconSize: [0, 0]
+      })
+    }).addTo(map);
+
+    savedObjects.push({
+      latlng: e.latlng,
+      text,
+      iconUrl,
+      style: labelClass
+    });
+
+    marker.on("click", () => {
+      if (currentTool === "delete") map.removeLayer(marker);
+    });
+  }
+});
+
+/* =========================
+   저장
+   ========================= */
+function exportData() {
+  let output = "/* === 지도 데이터 === */\n\n";
+
+  savedObjects.forEach(obj => {
+    output += `
+L.marker([${obj.latlng.lat}, ${obj.latlng.lng}], {
+  icon: L.divIcon({
+    className: "",
+    html: \`
+      <div class="${obj.style}">
+        <div class="icon-circle">
+          ${obj.iconUrl ? `<img src="${obj.iconUrl}">` : ""}
+        </div>
+        <span>${obj.text}</span>
+      </div>
+    \`,
+    iconSize: [0, 0]
+  })
+}).addTo(map);\n\n`;
+  });
+
+  prompt("아래 코드를 복사하세요", output);
+}
+</script>
+
+</body>
+</html>
