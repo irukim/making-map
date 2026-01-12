@@ -100,7 +100,7 @@ body { margin: 0; font-family: "Segoe UI", sans-serif; }
   <div class="subtitle">Map for photographers</div>
   <div class="info">
     • 주요 촬영 지점<br>
-    • 촬영 포인트 참고용
+    • 촬영 포인트 참고
   </div>
 </div>
 
@@ -856,10 +856,56 @@ L.marker([35.16463730246423, 129.06011891778593], {
     iconSize: [0, 0]
   })
 }).addTo(map);
-
+  </script>
   
-/* 필요하면 여기 아래에 계속 추가 */
+  <script>
+/* =========================
+   줌에 따른 가시성 제어 (추가 기능)
+   ========================= */
+
+const HIDE_ZOOM = 10;
+
+const textLayers = [];
+const roadLayers = [];
+
+/* 모든 레이어 수집 */
+map.eachLayer(layer => {
+  if (layer instanceof L.Marker) {
+    textLayers.push(layer);
+  }
+  if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
+    roadLayers.push(layer);
+  }
+});
+
+/* 줌 변경 시 표시/숨김 */
+function updateVisibility() {
+  const zoom = map.getZoom();
+
+  textLayers.forEach(layer => {
+    if (zoom <= HIDE_ZOOM) {
+      if (map.hasLayer(layer)) map.removeLayer(layer);
+    } else {
+      if (!map.hasLayer(layer)) map.addLayer(layer);
+    }
+  });
+
+  roadLayers.forEach(layer => {
+    if (zoom <= HIDE_ZOOM) {
+      if (map.hasLayer(layer)) map.removeLayer(layer);
+    } else {
+      if (!map.hasLayer(layer)) map.addLayer(layer);
+    }
+  });
+}
+
+/* 이벤트 연결 */
+map.on("zoomend", updateVisibility);
+
+/* 최초 1회 적용 */
+updateVisibility();
 </script>
 
 </body>
 </html>
+
