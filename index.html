@@ -866,39 +866,19 @@ L.marker([35.16463730246423, 129.06011891778593], {
 
 const HIDE_ZOOM = 10;
 
-const textLayers = [];
-const roadLayers = [];
-
-/* 모든 레이어 수집 */
-map.eachLayer(layer => {
-  if (layer instanceof L.Marker) {
-    textLayers.push(layer);
-  }
-  if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
-    roadLayers.push(layer);
-  }
-});
-
 /* 줌 변경 시 표시/숨김 */
 function updateVisibility() {
   const zoom = map.getZoom();
+  
+textLayers.forEach(layer => {
+  layer.setOpacity(zoom <= HIDE_ZOOM ? 0 : 1);
+});
 
-  textLayers.forEach(layer => {
-    if (zoom <= HIDE_ZOOM) {
-      if (map.hasLayer(layer)) map.removeLayer(layer);
-    } else {
-      if (!map.hasLayer(layer)) map.addLayer(layer);
-    }
+roadLayers.forEach(layer => {
+  layer.setStyle({
+    opacity: zoom <= HIDE_ZOOM ? 0 : 1
   });
-
-  roadLayers.forEach(layer => {
-    if (zoom <= HIDE_ZOOM) {
-      if (map.hasLayer(layer)) map.removeLayer(layer);
-    } else {
-      if (!map.hasLayer(layer)) map.addLayer(layer);
-    }
-  });
-}
+});
 
 /* 이벤트 연결 */
 map.on("zoomend", updateVisibility);
@@ -909,6 +889,7 @@ updateVisibility();
 
 </body>
 </html>
+
 
 
 
